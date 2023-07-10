@@ -890,7 +890,7 @@ classdef adaptationData
                 data=this.data.getDataAsVector(labels);
             end
             if nargin<4 || isempty(padWithNaNFlag)
-               padWithNaNFlag=false;
+               padWithNaNFlag=true;
             end
             nConds=size(inds{1},2);
             nLabels=size(data,2);
