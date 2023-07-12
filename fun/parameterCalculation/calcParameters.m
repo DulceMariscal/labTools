@@ -106,18 +106,18 @@ initTime=extendedEventTimes(:,1); %SHS
 finalTime=extendedEventTimes(:,6); %FTO2
 
 if strcmp(eventClass, '') % to store that type of event detection used for the trial
-    Event=full(trialData.gaitEvents.Data); 
+    Event=full(trialData.gaitEvents.Data);
     if isequal(Event(:,1),Event(:,5))
       eventType=2*ones(length(finalTime),1);
     elseif isequal(Event(:,1),Event(:,9))
-       eventType=1*ones(length(finalTime),1); 
+       eventType=1*ones(length(finalTime),1);
     end
 elseif strcmp(eventClass, 'kin')
     eventType=1*ones(length(finalTime),1);
 elseif strcmp(eventClass, 'force')
     eventType=2*ones(length(finalTime),1);
 end
-    
+
 %Initialize parameterSeries
 data=[eventType,bad,~bad,trial,initTime,finalTime];
 labels={'eventType','bad','good','trial','initTime','finalTime'};
@@ -137,12 +137,12 @@ if any(strcmpi(parameterClasses,'spatial')) && ~isempty(trialData.markerData) &&
     out=cat(out,spat);
 end
 %% EMG:
-if any(strcmpi(parameterClasses,'rawEMG')) && ~isempty(trialData.EMGData) 
+if any(strcmpi(parameterClasses,'rawEMG')) && ~isempty(trialData.EMGData)
     %Classic way:
     [EMG_alt] = computeEMGParameters(trialData.EMGData,trialData.gaitEvents,s,eventTypes);
     out=cat(out,EMG_alt);
 end
-%% Angles  
+%% Angles
 if ~isempty(trialData.angleData)
 %     [angles] = computeAngleParameters(trialData.angleData,trialData.gaitEvents,s);
     [angles] = computeAngleParameters(trialData.angleData,trialData.gaitEvents,s,eventTypes);
@@ -155,8 +155,12 @@ if any(strcmpi(parameterClasses,'force')) && ~isempty(trialData.GRFData)
     if ~isempty(force.Data)
         out=cat(out,force);
     end
-    
-    [force_OGFP.Data] = [];%computeForceParameters_OGFP(strideEvents,trialData.GRFData,s, f, subData.weight, trialData, trialData.markerData);
+
+    %%
+    % If you encounter a bug with a line of code in this section (e.g.,
+    % indexing array out of bounds), comment it out, which will prevent the
+    % overground forces from being processed and output.
+    [force_OGFP.Data] = computeForceParameters_OGFP(strideEvents,trialData.GRFData,s, f, subData.weight, trialData, trialData.markerData);
     if ~isempty(force_OGFP.Data)
         out=cat(out,force_OGFP);
     end
@@ -165,7 +169,7 @@ if any(strcmpi(parameterClasses,'force')) && ~isempty(trialData.GRFData)
     if ~isempty(force_OGFP_aligned.Data)
         out=cat(out,force_OGFP_aligned);
     end
-    
+    %%%
 end
 %% Compute an updated bad/good flag based on computed parameters & finding outliers (only if basic parameters are being computed)
 if any(strcmpi(parameterClasses,'basic'))
